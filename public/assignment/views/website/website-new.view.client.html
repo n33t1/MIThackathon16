@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-inner">
+            <p class="navbar-text pull-left">
+                <a href="#/user/{{model.userId}}/website"
+                   class="navbar-link">
+                    <span class="glyphicon glyphicon-chevron-left"
+                          aria-hidden="true"></span>
+                </a>
+            </p>
+            <span class="navbar-brand">
+                New Website
+            </span>
+            <p class="navbar-text pull-right">
+                <button class="navbar-link clear-button"
+                        ng-click="model.newWebsite()">
+                    <span class="glyphicon glyphicon-ok"
+                          aria-hidden="true"></span>
+                </button>
+            </p>
+        </div>
+    </div>
+</nav>
+
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="container-fluid">
+        <div class="navbar-inner">
+            <p class="navbar-text pull-right">
+                <a href="#/user/{{model.userId}}">
+                            <span class="glyphicon glyphicon-user"
+                                  aria-hidden="true"></span>
+                </a>
+            </p>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div ng-show="model.success"
+         class="alert alert-success"
+         role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Success:</span>{{model.success}}
+    </div>
+
+    <div ng-show="model.error"
+         class="alert alert-danger"
+         role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only">Error:</span>{{model.error}}
+    </div>
+    
+    <form name="newWebsiteForm" novalidate>
+        <div class="form-group"
+             ng-class="{ 'has-error' : newWebsiteForm.name.$invalid && newWebsiteForm.$submitted}">
+            <label for="name">Name</label> <!-- for must match the id bellow -->
+            <input ng-model="model.website.name"
+                   type="text"
+                   class= "form-control"
+                   name="name"
+                   id ="name"
+                   placeholder="Name"
+                   required />
+            <span class="help-block"
+                  ng-show="newWebsiteForm.name.$invalid && newWebsiteForm.$submitted">
+                Please provide a name.
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label> <!-- for must match the id bellow -->
+            <textarea ng-model="model.website.description"
+                      rows="5"
+                      class="form-control"
+                      id="description"
+                      placeholder="Description"></textarea>
+        </div>
+    </form>
+</div>
