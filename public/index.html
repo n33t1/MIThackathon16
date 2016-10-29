@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="initial-scale=1.25, user-scalable=no">
+
+    <title>Jeffrey Weng</title>
+
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <link href="css/home.css" rel="stylesheet" type='text/css'/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+
+    <script src="assignment/js/jquery.js"></script>
+    <script src="assignment/js/jquery-ui.js"></script>
+    <script src="assignment/js/jquery.ui.touch-punch.min.js"></script>
+</head>
+<body>
+
+    <div class="row banner-container row-eq-height">
+        <div class="hidden-xs col-sm-6">
+            <div class="imgContainer">
+            <div class="carousel-item-img">
+                <img src="images/bannerimage.jpeg" />
+            </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6">
+            <div class="row watchheight">
+                <div class="col-xs-2">
+                </div>
+                <div class="col-xs-9 mypanel">
+                    <h2 id="myname">
+                        <strong>Jeffrey Weng</strong>
+                    </h2>
+                    <h3>
+                        —
+                    </h3>
+                    <h4 id="myintro">
+                        Hello! I am a Computer Science student studying at Northeastern University.
+                        I am currently learning web development, specifically to apply MEAN stack development techniques. The following links will direct you towards some of my works throughout the semester.
+                    </h4>
+                    <br />
+                    <a class="btn btn-default" href="http://finalproject-jeffreychenxi.rhcloud.com">Project</a>
+                    <a class="btn btn-default" href="assignment/index.html">Assignment</a>
+                    <a class="btn btn-default" href="https://github.com/BeanRider/WENG-JEFFREY-web-dev">GitHub</a>
+                </div>
+                <div class="col-xs-1">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var $containerHeight = $(window).height();
+            $('.watchheight').css({
+                height: $containerHeight
+            });
+
+            $('.imgContainer').css({
+                height: $containerHeight
+            });
+        });
+
+        $(window).on('resize', function(){
+            var $containerHeight = $(window).height();
+            $('.watchheight').css({
+                height: $containerHeight
+            });
+            $('.imgContainer').css({
+                height: $containerHeight
+            });
+        });
+    </script>
+</body>
+</html>
