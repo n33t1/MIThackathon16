@@ -24,8 +24,8 @@ app.use(passport.session()); // this makes passportjs to remember the session
 app.use(express.static(__dirname + '/dipole_public'));
 
 // Put the instance of app into our application
-var dipole = require('./dipole_backend/app.js');
-dipole(app);
+// var dipole = require('./assignment/app.js'); // change back to dipole_backend
+// dipole(app);
 
 var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
 var port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
