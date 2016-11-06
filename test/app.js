@@ -4,15 +4,18 @@ module.exports = function(app)
     app.post("/api/test", createMessage);
     app.delete("/api/test/:id", deleteMessage);
 
-    var connectionString = 'mongodb://dipoleTeam:dipole-team-amber-jeffrey-1@cluster0-shard-00-00-oucec.mongodb.net:27017,cluster0-shard-00-01-oucec.mongodb.net:27017,cluster0-shard-00-02-oucec.mongodb.net:27017/admin?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin';
 
-    if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
-        connectionString = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
-            process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
-            process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
-            process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
-            process.env.OPENSHIFT_APP_NAME;
-    }
+    var connectionString = 'mongodb://127.0.0.1:27017/test';
+    //
+    // var connectionString = 'mongodb://dipoleTeam:dipole-team-amber-jeffrey-1@cluster0-shard-00-00-oucec.mongodb.net:27017,cluster0-shard-00-01-oucec.mongodb.net:27017,cluster0-shard-00-02-oucec.mongodb.net:27017/admin?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin';
+    // //
+    // if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
+    //     connectionString = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ":" +
+    //         process.env.OPENSHIFT_MONGODB_DB_PASSWORD + "@" +
+    //         process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+    //         process.env.OPENSHIFT_MONGODB_DB_PORT + '/' +
+    //         process.env.OPENSHIFT_APP_NAME;
+    // }
 
     var mongoose = require("mongoose");
     mongoose.connect(connectionString);

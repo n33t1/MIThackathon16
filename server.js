@@ -27,7 +27,9 @@ app.use(express.static(__dirname + '/dipole_public'));
 // var dipole = require('./assignment/app.js'); // change back to dipole_backend
 // dipole(app);
 
-var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
+require ("./test/app.js")(app);
+
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP
 var port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
 
 app.listen(port, ipaddress);
