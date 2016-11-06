@@ -50,9 +50,13 @@ module.exports = function(app, models) {
     // }
 
     var facebookConfig = {
-        clientID     : process.env.FACEBOOK_CLIENT_ID,
-        clientSecret : process.env.FACEBOOK_CLIENT_SECRET,
-        callbackURL  : process.env.FACEBOOK_CALLBACK_URL
+	clientID     : '754220301289665',
+       clientSecret : '41860e58c256a3d7ad8267d3c1939a4a',
+       callbackURL  : process.env.FACEBOOK_CALLBACK_URL
+        // TODO configure env variables via config file!!
+	//clientID     : process.env.FACEBOOK_CLIENT_ID,
+        //clientSecret : process.env.FACEBOOK_CLIENT_SECRET,
+        //callbackURL  : process.env.FACEBOOK_CALLBACK_URL
     };
     console.log(facebookConfig.callbackURL);
 
