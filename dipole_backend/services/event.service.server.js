@@ -1,328 +1,129 @@
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var FacebookStrategy = require('passport-facebook').Strategy;
-var bcrypt = require('bcrypt-nodejs');
+var mongoose         = require("mongoose");
 
-// Load secret configuration file, containing API session secrets
-var fs = require("fs");
-var fileName = "./secret-config.json";
-var config;
-try {
-    config = require(fileName);
-} catch (err) {
-    config = {};
-    console.log("unable to read file '" + fileName + "': ", err);
-    console.log("see secret-config-sample.json for an example");
-}
+module.exports = function(app,models) {
 
-// Main job is to parse into json, and parse back into json.
-module.exports = function(app, models) {
-
-    // Get the session secret
+    var eventModel = models.eventModel;
     var userModel = models.userModel;
 
-    app.get("/auth/facebook", passport.authenticate('facebook', { scope : 'email' }));
-    app.get("/auth/facebook/callback",
-        passport.authenticate("facebook", {
-            successRedirect: "/assignment/#/user",
-            failureRedirect: "/assignment/#/login"
-        }));
+    app.post('/api/event', auth, createEvent);
+    app.get('/api/event', auth, findAllEvents);
+    app.put('/api/event/:id', auth, updateEvent);
+    app.delete('/api/event/:id', auth, deleteEvent);
 
-    // Bind the CRUD operations with urls and functions onto the EXPRESS app
-
-    // the body is safely tucked into the http post request, rather than in the url.
-    // First goes to passport.authenticate, and if passport passes, go to login. if the passport failed, pass forbidden 403
-    app.post("/api/login", passport.authenticate('dipole'), login);
-
-    app.post("/api/register", register);
-
-    app.post("/api/logout", logout);
-
-    app.get("/api/loggedin", loggedin);
-
-    // entry point for getting users using url QUERIES: find by email or credentials
-    app.get("/api/user", getUsers);
-    // app.get("/api/user?email=:email", findUserByEmail); // this won't work, query url doesn't work
-    app.get("/api/user/:userId", findUserById);
-    app.put("/api/user/:userId", updateUser);
-    app.delete("/api/user/:userId", deleteUser);
-    app.delete("/api/user/:userId", authenticate, deleteUser);
-    // this will intercept with authenticate on the server side, and make sure
-    // it is the user in this session. You can put any number of such middlewares in between.
-    // function authenticate(req, res, next) {
-    //     console.log(req.user);
-    //     console.log(req.isAuthenticated());
-    //     if (req.isAuthenticated()) {
-    //         next(); // go forward and call next(), which will go to deleteUser.
-    //     } else {
-    //         res.send(401); // ?
-    //         res.send(403); // not authorized
-    //     }
-    // }
-
-    var facebookConfig = {
-        clientID     : config.facebook.id,
-        clientSecret : config.facebook.clientSecret,
-        callbackURL  : process.env.FACEBOOK_CALLBACK_URL
-        //clientID     : process.env.FACEBOOK_CLIENT_ID,
-        //clientSecret : process.env.FACEBOOK_CLIENT_SECRET,
-        //callbackURL  : process.env.FACEBOOK_CALLBACK_URL
-    };
-    console.log(facebookConfig.callbackURL);
-
-    passport.use('dipole', new LocalStrategy(localStrategy));
-    passport.use("facebook", new FacebookStrategy(facebookConfig, facebookStrategy));
-    passport.serializeUser(serializeUser);
-    passport.deserializeUser(deserializeUser);
-
-    function facebookStrategy(token, refreshToken, profile, done) {
-        var id = profile.id;
-        console.log(profile);
-        userModel
-            .findUserByFacebookId(id)
-            .then(
-                function(user) {
-                    if (user) {
-                        return done(null, user);
-                    } else {
-                        var newUser = {
-                            // TODO this username is a temporary way to resolve this, make sure to validate this.
-                            // username: profile.displayName.replace(/ /g, ""),
-                            facebook: {
-                                id: profile.id,
-                                displayName: profile.displayName
-                            }
-                        };
-                        return userModel.createUser(newUser);
-                    }
-                },
-                function(error) {
-                    return done(error);
-                }
-            )
-            .then(
-                function(user) {
-                    return done(null, user);
-                },
-                function(error) {
-                    return done(error);
-                }
-            );
-
-        console.log(profile);
-        // TODO
-    }
-
-    function localStrategy(email, password, done) {
-        userModel
-            .findUserByEmail(email)
-            .then(
-                function(user) {
-                    if (user && bcrypt.compareSync(password, user.password)) {
-                        return done(null, user); // it enhances the request object with the user.
-                    } else {
-                        return done(null, false);
-                    }
-                },
-                function(error) {
-                    if (error) {
-                        return done(error);
-                    }
-                }
-            );
-    }
-
-    // called right before the response goes back to the client.
-    function serializeUser(user, done) {
-        done(null, user); // in this case the entire user is being serialized.
-    }
-
-    // right before passport intercepts the request, verify data has not been tampered, that the userId is still valid.
-    function deserializeUser(user, done) {
-        userModel
-            .findUserById(user._id)
-            .then(
-                function(user) {
-                    // resets the session
-                    done(null, user);
-                },
-                function(error) {
-                    done(error, null); // 403
-                }
-            );
-    }
-
-    function login(req, res) {
-        var user = req.user;
-        res.json(user);
-    }
-
-    // Normal registration, using unique email, and password
-    function register(req, res) {
-        var email = req.body.email;
-        var password = req.body.password;
+    function createEvent(req, res) {
+        var newEvent = JSON.parse(JSON.stringify(req.body));
+        var devId = req.params.userId;
 
         // Null check
-        if (req.body == null) {
-            res.status(400).send("User (body) cannot be null!");
+        if (newEvent == null || devId == null) {
+            res.status(400).send("Event cannot be null!");
             return;
         }
 
-        if (email == null || password == null) {
-            res.status(400).send("User email, password cannot be null!");
-            return;
-        }
-
-        console.log(email);
-        console.log(password);
-
-        userModel
-            .findUserByEmail(email)
+        // 1. Create event in event model
+        eventModel
+            .createEventForUser(devId, newEvent)
             .then(
-                function(user) {
-                    console.log("After confirming with model that email doesn't already exist: " + user);
-                    if (user) {
-                        res.status(400).send("Email already exists!");
-                        return;
-                    } else {
-                        req.body.password = bcrypt.hashSync(password);
-                        console.log("After encrypting password: " + req.body);
-                        return userModel.createUser(req.body);
-                    }
+                function (event) {
+
+                    userModel
+                        .findUserById(devId)
+                        .then(
+                            function (user) {
+
+                                // User with devId does not exist
+                                if (!user) {
+                                    res.status(400).send("Given developer id " + devId + " does not exist!");
+                                    return;
+                                }
+
+                                // Add new event reference to user
+                                user.event.push(event._id);
+                                console.log(user.events);
+                                userModel
+                                    .updateUser(devId, user)
+                                    .then(
+                                        function (user) {
+                                            // DO NOTHING
+                                        },
+                                        function (error) {
+                                            // Failed to update the event reference to the user
+                                            res.status(404).send(
+                                                "Failed to update list of event references to user with id: "
+                                                + id + "! " + error.data);
+                                        }
+                                    );
+
+                                res.json(event);
+                            },
+                            function (error) {
+                                res.status(400).send(error.data);
+                            }
+                        );
                 },
-                function(error) {
-                    res.status(400).send(error);
+                function (error) {
+                    res.status(400).send(
+                        "Failed to create event for user with id "
+                        + devId + "! " + error.data);
+                }
+            );
+    }
+
+    function findAllEvents(req, res) {
+        eventModel
+            .findAllEvents()
+            .then(
+                function (events) {
+                    res.json(events);
+                },
+                function () {
+                    res.status(400).send(err);
+                }
+            );
+    }
+
+    function deleteEvent(req, res) {
+        eventModel
+            .removeEvent(req.params.id)
+            .then(
+                function (event) {
+                    return eventModel.findAllEvents();
+                },
+                function (err) {
+                    res.status(400).send(err);
                 }
             )
             .then(
-                function(user) {
-                    // passport added this login function
-                    req.login(user, function(err) {
-                        if (err) {
-                            res.status(400).send(err);
-                        } else {
-                            res.json(user);
-                        }
-                    });
+                function (events) {
+                    res.json(events);
                 },
-                function(error) {
-                    res.status(400).send(error);
+                function (err) {
+                    res.status(400).send(err);
                 }
             );
+
     }
 
-    function logout(req, res) {
-        req.logout();
-        res.send(200);
-    }
+    function updateEvent(req, res) {
+        var newEvent = req.body;
 
-    function loggedin(req, res) {
-        // isAuthenticated is provided by passport.
-        if (req.isAuthenticated()) {
-            res.json(req.user);
-        } else {
-            res.send('0');
-        }
-    }
-
-    function getUsers(req, res) {
-        var email = req.query.email;
-        var password = req.query.password;
-
-        if (email && password) {
-            // if given both
-            findUserByCredentials(email, password, res);
-        } else if (email) {
-            // if given only email
-            findUserByEmail(email, res);
-        } else {
-            res.status(400).send("Unable to respond to given URL query!");
-        }
-    }
-
-    // A helper for getUsers();
-    function findUserByCredentials(email, password, res) {
-        userModel
-            .findUserByCredentials(email, password)
+        eventModel
+            .updateEvent(req.params.id, newEvent)
             .then(
-                function(user) {
-                    res.json(user);
+                function (event) {
+                    return eventModel.findAllEvents();
                 },
-                function(error) {
-                    // more or less authentication error
-                    res.status(403).send("No such email+password pair found!" + " " + error.data);
+                function (err) {
+                    res.status(400).send(err);
                 }
-            );
-    }
-
-    // A helper for getUsers();
-    function findUserByEmail(email, res) {
-        userModel
-            .findUserByEmail(email)
+            )
             .then(
-                function(user) {
-                    res.json(user);
+                function (events) {
+                    res.json(events);
                 },
-                function(error) {
-                    res.status(404).send("No such email found!" + " " + error.data);
+                function (err) {
+                    res.status(400).send(err);
                 }
             );
     }
-
-    function findUserById(req, res) {
-        var id = req.params.userId;
-        userModel
-            .findUserById(id)
-            .then(
-                function(user) {
-                    if (!user) {
-                        res.status(404).send(
-                            "Given user ID: " + id + " not found!");
-                        return;
-                    }
-                    res.json(user);
-                },
-                function(error) {
-                    res.status(404).send("User id is not found: " + id + ". " + error.data);
-                }
-            );
-    }
-
-    function updateUser(req, res) {
-        var id = req.params.userId;
-        var newUser = req.body;
-
-        if (!newUser) {
-            res.status(400).send("Provided a null updated user!");
-            return;
-        }
-
-        userModel
-            .updateUser(id, newUser)
-            .then(
-                function(user) {
-                    res.send(200);
-                },
-                function(error) {
-                    // 400: client not possible to update user
-                    res.status(404).send("Failed to update user with id: " + id + "! " + error.data);
-                }
-            );
-    }
-
-    function deleteUser(req, res) {
-        var id = req.params.userId;
-
-        userModel
-            .deleteUser(id)
-            .then(
-                function(user) {
-                    res.send(200);
-                },
-                function(error) {
-                    // 404: client not possible to delete user
-                    res.status(404).send("Unable to remove user with id: " + id + "! " + error.data);
-                }
-            );
-    }
-};
+}
