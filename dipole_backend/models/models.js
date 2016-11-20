@@ -12,17 +12,18 @@ module.exports = function() {
     // }
     mongoose.connect(connectionString);
 
-    // var userModel = require("./user/user.model.server.js")();
+    var userModel = require("./user/user.model.server.js")();
     // var websiteModel = require("./website/website.model.server.js")();
     // var pageModel = require("./page/page.model.server.js")();
     // var widgetModel = require("./widget/widget.model.server.js")();
 
     // Map
-    // var models = {
-    //     userModel: userModel,
+    var models = {
+        userModel: userModel,
+        requestModel: requestModel,
     //     websiteModel: websiteModel,
     //     pageModel: pageModel,
     //     widgetModel: widgetModel
-    // };
-    // return models;
+    };
+    return models;
 };
