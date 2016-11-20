@@ -1,5 +1,3 @@
-var mongoose         = require("mongoose");
-
 module.exports = function(app,models) {
 
     var eventModel = models.eventModel;
