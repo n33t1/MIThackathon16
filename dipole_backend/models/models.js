@@ -13,6 +13,7 @@ module.exports = function() {
     mongoose.connect(connectionString);
 
     var userModel = require("./user/user.model.server.js")();
+    var eventModel = require("./event/event.model.server.js")();
     // var websiteModel = require("./website/website.model.server.js")();
     // var pageModel = require("./page/page.model.server.js")();
     // var widgetModel = require("./widget/widget.model.server.js")();
@@ -20,7 +21,8 @@ module.exports = function() {
     // Map
     var models = {
         userModel: userModel,
-        requestModel: requestModel,
+        eventModel: eventModel,
+        requestModel: requestModel
     //     websiteModel: websiteModel,
     //     pageModel: pageModel,
     //     widgetModel: widgetModel
