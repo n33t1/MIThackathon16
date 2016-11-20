@@ -9,14 +9,43 @@ module.exports = function() {
     var Event = mongoose.model("Event", EventSchema);
 
     var api = {
-        // TODO API for EventSchema
-        // createUser: createUser,
-        // findUserById: findUserById,
-        // findUserByUsername: findUserByUsername,
-        // findUserByCredentials: findUserByCredentials,
-        // updateUser: updateUser,
-        // deleteUser: deleteUser,
-        // findUserByFacebookId: findUserByFacebookId
+//        findEventByCreator: findEventByCreator,
+        findEventByEventname: findEventByEventname,
+        findEventById: findEventById,
+        findAllEvents: findAllEvents,
+        createEvent: createEvent,
+        removeEvent: removeEvent,
+        updateEvent: updateEvent,
+        getMongooseModel: getMongooseModel
     };
     return api;
+
+    function updateEvent(eventId, event) {
+        return EventModel.update({_id: eventId}, {$set: event});
+    }
+
+    function removeEvent(eventId) {
+        return EventModel.remove({_id: eventId});
+    }
+
+    function findAllEvents() {
+        return EventModel.find();
+    }
+    function createEvent(event, _admin) {
+        website._admin = userId;
+        return EventModel.create(event);
+    }
+
+    function findEventByEventname(eventname) {
+        return EventModel.findOne({eventname: eventname});
+    }
+
+    function getMongooseModel() {
+        return EventModel;
+    }
+
+    function findEventById(eventId) {
+        return EventModel.findById(eventId);
+    }
+
 };
