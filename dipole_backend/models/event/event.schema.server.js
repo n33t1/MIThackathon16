@@ -2,29 +2,94 @@ module.exports = function() {
 
     var mongoose = require("mongoose");
 
-    var EventSchema = mongoose.Schema({
-            _admin: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
-            name: String,
-            description: String,
-            publishStatus : {type: Boolean, enum: {expired, draft, live}},
-            // coverPicture = filepath,
-            dateCreated : {type: Date, default: Date.now},
-            time : {startTime: DateTime, endTime: DateTIme},
-            address : {
-                street: String,
-                number: String,
-                zip: String,
-                city: String},
-            socialMediaAPIs: {
-                facebook: {id: String, displayName: String},
-                twitter: {id: String},
-                linkedIn: {id: String}},
-            _wishListID: {type: mongoose.Schema.Types.ObjectId, ref: "WishList"},
-            _giveListID: {type: mongoose.Schema.Types.ObjectId, ref: "GiveList"},
-            Tags : [String],
-            recommendations : [eventID]
-            // type: enumeration{“courses”, “activities”},
-}, {collection: "dipole.event"});
+    var publishStatusTypes = "EXPIRED DRAFT LIVE".split(" ");
+    var states = {
+        "AL": "Alabama",
+        "AK": "Alaska",
+        "AS": "American Samoa",
+        "AZ": "Arizona",
+        "AR": "Arkansas",
+        "CA": "California",
+        "CO": "Colorado",
+        "CT": "Connecticut",
+        "DE": "Delaware",
+        "DC": "District Of Columbia",
+        "FM": "Federated States Of Micronesia",
+        "FL": "Florida",
+        "GA": "Georgia",
+        "GU": "Guam",
+        "HI": "Hawaii",
+        "ID": "Idaho",
+        "IL": "Illinois",
+        "IN": "Indiana",
+        "IA": "Iowa",
+        "KS": "Kansas",
+        "KY": "Kentucky",
+        "LA": "Louisiana",
+        "ME": "Maine",
+        "MH": "Marshall Islands",
+        "MD": "Maryland",
+        "MA": "Massachusetts",
+        "MI": "Michigan",
+        "MN": "Minnesota",
+        "MS": "Mississippi",
+        "MO": "Missouri",
+        "MT": "Montana",
+        "NE": "Nebraska",
+        "NV": "Nevada",
+        "NH": "New Hampshire",
+        "NJ": "New Jersey",
+        "NM": "New Mexico",
+        "NY": "New York",
+        "NC": "North Carolina",
+        "ND": "North Dakota",
+        "MP": "Northern Mariana Islands",
+        "OH": "Ohio",
+        "OK": "Oklahoma",
+        "OR": "Oregon",
+        "PW": "Palau",
+        "PA": "Pennsylvania",
+        "PR": "Puerto Rico",
+        "RI": "Rhode Island",
+        "SC": "South Carolina",
+        "SD": "South Dakota",
+        "TN": "Tennessee",
+        "TX": "Texas",
+        "UT": "Utah",
+        "VT": "Vermont",
+        "VI": "Virgin Islands",
+        "VA": "Virginia",
+        "WA": "Washington",
+        "WV": "West Virginia",
+        "WI": "Wisconsin",
+        "WY": "Wyoming"
+    };
 
-    return WebsiteSchema;
+    var EventSchema = mongoose.Schema({
+        _admin: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
+        name: String,
+        description: String,
+        publishStatus : {enum: publishStatusTypes},
+        // coverPicture = filepath,
+        dateCreated : {type: Date, default: Date.now},
+        time : {
+            startTime: {type: Date, default: Date.now},
+            endTime: {type: Date, default: Date.now}},
+        address : {
+            lineOne: String,
+            lineTwo: String,
+            zip: Number,
+            city: String,
+            state: {enum: Object.keys(states)}},
+        socialMedia: {
+            facebookUrl: String,
+            twitterUrl: String,
+            linkedInUrl: String},
+        _wishListID: {type: mongoose.Schema.Types.ObjectId, ref: "WishList"},
+        _giveListID: {type: mongoose.Schema.Types.ObjectId, ref: "GiveList"},
+        tags : [String],
+        recommendations : [{type: mongoose.Schema.Types.ObjectId, ref: "Event"}]
+    }, {collection: "dipole.event"});
+
+    return EventSchema;
 };
